@@ -8,8 +8,9 @@ BSP_DST := ${CURDIR}/boards/${BOARD}/${BOARD}.bsp
 BASE_OVERLAY_PATH := ${CURDIR}/boards/${BOARD}/base
 BASE_OVERLAY := ${BASE_OVERLAY_PATH}/base.bit
 
-VERSION := 3.1.1
+VERSION := 3.1.2
 IMAGE := ${BOARD}-${VERSION}.img
+REMOTE_IMAGE := ${BOARD}-${VERSION}-remote.img
 
 all: checkenv_rfsocpynq gitsubmodule ${PREBUILT_SDIST_DST} ${PREBUILT_ROOTFS_DST} checkenv_pynq ${BASE_OVERLAY} ${IMAGE}
 	@echo ""
@@ -32,7 +33,7 @@ ${PREBUILT_SDIST_DST}:
 	wget https://download.amd.com/opendownload/pynq/pynq-3.1.tar.gz -O ${PREBUILT_SDIST_DST}
 
 ${PREBUILT_ROOTFS_DST}:
-	wget https://download.amd.com/opendownload/pynq/jammy.aarch64.3.1.0.tar.gz -O ${PREBUILT_ROOTFS_DST}
+	wget https://download.amd.com/opendownload/pynq/jammy.aarch64.3.1.1.tar.gz -O ${PREBUILT_ROOTFS_DST}
 
 checkenv_pynq:
 	${CURDIR}/pynq/sdbuild/scripts/check_env.sh
@@ -46,7 +47,10 @@ ${IMAGE}:
 	cd ${CURDIR}/pynq/sdbuild && make BOARDDIR=${CURDIR}/boards BOARDS=${BOARD}
 	mv ${CURDIR}/pynq/sdbuild/output/${BOARD}*.img ${IMAGE}
 
-pynqremote:
+${REMOTE_IMAGE}:
 	cd ${CURDIR}/pynq/sdbuild && make pynqremote BOARDDIR=${CURDIR}/boards BOARDS=${BOARD}
-	mv ${CURDIR}/pynq/sdbuild/output/${BOARD}*.img ${IMAGE}
+	mv ${CURDIR}/pynq/sdbuild/output/${BOARD}*.img ${REMOTE_IMAGE}
+
+pynqremote: checkenv_rfsocpynq gitsubmodule checkenv_pynq ${REMOTE_IMAGE}
+	echo "Done building remote image: ${REMOTE_IMAGE}"
 
